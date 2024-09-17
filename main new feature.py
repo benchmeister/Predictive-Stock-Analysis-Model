@@ -2,10 +2,12 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 import yfinance as yf
+from sklearn.metrics import r2_score
 
 # Download stock price data
 def download_stock_data(ticker, start_date, end_date):
     stock_data = yf.download(ticker, start=start_date, end=end_date)
+    print(stock_data)
     return stock_data['Adj Close'], stock_data.index  # Return both prices and dates
 
 # Preprocess data and create input sequences
@@ -30,8 +32,8 @@ def train_model(X_train, y_train):
     return model
 
 # Main Execution - Download stock data
-ticker = 'GOOGL'
-start_date = '2020-01-01'
+ticker = 'NVDA'
+start_date = '2014-01-01'
 end_date = '2024-09-17'
 stock_data, dates = download_stock_data(ticker, start_date, end_date)
 
@@ -73,3 +75,13 @@ prediction_date = dates[specific_index]  # Date of prediction
 # Output the stock price for the specific date and prediction
 print(f"Stock Price on {specific_date}: ${stock_data[specific_date]:.2f}")
 print(f"Predicted Stock Price for {prediction_date.date()}: ${predicted_price:.2f}")
+
+# Predict the values for the test set
+y_pred = model.predict(X_test)
+
+# Calculate the R-squared score
+r2 = r2_score(y_test, y_pred)
+
+# Print the R-squared score
+print(f"R-squared score: {r2:.4f}")
+
