@@ -1,7 +1,9 @@
 import pandas as pd
 import yfinance as yf
-from prophet import Prophet
+from prophetModel import Prophet
 from datetime import datetime
+from prophet.diagnostics import cross_validation, performance_metrics
+from prophet.plot import plot_cross_validation_metric
 
 def get_stock_data(ticker, start_date, end_date):
     data = yf.download(ticker, start=start_date, end=end_date)
@@ -17,6 +19,17 @@ def fit_prophet_model(stock_data):
     """
     model = Prophet()
     model.fit(stock_data)
+
+    # Add cross-validation here
+    print("Performing cross-validation...")
+    df_cv = cross_validation(model, initial='365 days', period='180 days', horizon='90 days')
+    
+    # Evaluate the performance metrics
+    print("Evaluating performance...")
+    df_p = performance_metrics(df_cv)
+    print(df_p[['horizon', 'mae', 'rmse', 'mape']])  # Print relevant performance metrics
+
+
     return model
 
 def make_prediction(model, stock_data, end_date, predict_date):
@@ -25,10 +38,10 @@ def make_prediction(model, stock_data, end_date, predict_date):
     """
     end_date_dt = datetime.strptime(end_date, "%Y-%m-%d").date()
     predict_date_dt = datetime.strptime(predict_date, "%Y-%m-%d").date()
-    print(f"***THIS IS THE PREDICT DATE DT {predict_date_dt} ***")
+    # print(f"***THIS IS THE PREDICT DATE DT {predict_date_dt} ***")
     
     # Debugging: Print the dates in the historical data
-    print("Dates in historical data:")
+    # print("Dates in historical data:")
     print(stock_data['ds'].to_string(index=False))
     
     # Check if the prediction date is in the historical data (i.e., a trading day)
